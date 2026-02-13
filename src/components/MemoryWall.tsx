@@ -52,31 +52,31 @@ const MemoryWall = ({ memories }: {memories: Memory[];}) => {
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((memory, i) =>
-          <motion.div
-            key={memory.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: Math.min(i * 0.08, 0.5) }}
-            whileHover={{ y: -8, scale: 1.02 }}
-            className={`glass rounded-2xl p-6 cursor-default transition-shadow duration-300 hover:${glowOptions[i % 3]}`}
-            style={{
-              transform: `rotate(${tiltOptions[i % tiltOptions.length]}deg)`
-            }}>
-
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-sans font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
-                  From: {memory.from}
-                </span>
-              </div>
-              <p className="text-xs font-sans text-muted-foreground mb-2">
-                To: <span className="font-semibold text-foreground">{memory.to}</span>
-              </p>
-              
+          {filtered.map((memory, i) => {}
 
 
-            </motion.div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           )}
         </div>
 
