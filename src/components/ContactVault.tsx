@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Mail, MapPin, Copy, Check, Search, Shield, User, AtSign } from "lucide-react";
-import { classmates, saveContact, getContacts, type Contact } from "@/lib/data";
+import { getRegisteredNames, saveContact, getContacts, type Contact } from "@/lib/data";
 import confetti from "canvas-confetti";
 
 const ContactVault = () => {

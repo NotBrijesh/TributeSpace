@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import HeroSection from "@/components/HeroSection";
+import RegisterName from "@/components/RegisterName";
 import MemoryForm from "@/components/MemoryForm";
 import MemoryWall from "@/components/MemoryWall";
 import RandomMemory from "@/components/RandomMemory";
@@ -28,6 +29,7 @@ const Index = () => {
         <div className="h-px w-24 bg-border" />
       </div>
 
+      <RegisterName onRegister={refresh} />
       <MemoryForm onSubmit={refresh} />
       <MemoryWall memories={memories} />
       <RandomMemory />

@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { classmates, saveMemory } from "@/lib/data";
+import { getRegisteredNames, saveMemory } from "@/lib/data";
 import { Heart, Search, Send } from "lucide-react";
 
 const MAX_CHARS = 500;
@@ -15,7 +15,8 @@ const MemoryForm = ({ onSubmit }: { onSubmit: () => void }) => {
   const [submitted, setSubmitted] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const filtered = classmates.filter((n) =>
+  const registeredNames = getRegisteredNames();
+  const filtered = registeredNames.filter((n) =>
     n.toLowerCase().includes(search.toLowerCase())
   );
 

@@ -1,13 +1,19 @@
-export const classmates = [
-  "Aarav Sharma", "Aditi Verma", "Akash Gupta", "Ananya Patel", "Arjun Singh",
-  "Bhavya Joshi", "Charvi Reddy", "Devansh Kumar", "Diya Mishra", "Esha Kapoor",
-  "Farhan Khan", "Gauri Nair", "Harsh Mehta", "Ishita Agarwal", "Jai Prakash",
-  "Kavya Iyer", "Krish Malhotra", "Lavanya Rao", "Manav Chopra", "Meera Desai",
-  "Naman Saxena", "Neha Bhatia", "Ojas Tiwari", "Pooja Srivastava", "Rahul Dubey",
-  "Riya Chauhan", "Rohan Pandey", "Sakshi Jain", "Siddharth Yadav", "Sneha Kulkarni",
-  "Tanvi Shukla", "Utkarsh Rastogi", "Varun Pillai", "Vidya Sundar", "Yash Thakur",
-  "Zara Hussain"
-];
+export function getRegisteredNames(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem("farewell-names") || "[]");
+  } catch { return []; }
+}
+
+export function registerName(name: string): string[] {
+  const names = getRegisteredNames();
+  const trimmed = name.trim();
+  if (trimmed && !names.includes(trimmed)) {
+    names.push(trimmed);
+    names.sort((a, b) => a.localeCompare(b));
+    localStorage.setItem("farewell-names", JSON.stringify(names));
+  }
+  return names;
+}
 
 export const friendshipQuotes = [
   "We didn't realize we were making memories, we just knew we were having fun.",
