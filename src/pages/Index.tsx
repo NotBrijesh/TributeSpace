@@ -48,19 +48,19 @@ const Index = () => {
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        className="py-16 text-center px-6"
-      >
+        className="py-16 text-center px-6">
+
         <p className="font-display text-xl md:text-2xl text-foreground mb-2 italic">
           "We didn't realize we were making memories,
           <br />
           we just knew we were having fun."
         </p>
-        <p className="text-muted-foreground font-sans text-sm mt-6">
-          Made with 💖 by Class 11th 2025-26
+        <p className="text-muted-foreground font-sans text-sm mt-6">Made with 💖 by Brijesh
+
         </p>
       </motion.footer>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Index;
