@@ -1,12 +1,13 @@
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Trash2 } from "lucide-react";
 import type { Memory } from "@/lib/data";
+import { deleteMemory } from "@/lib/data";
 
 const tiltOptions = [-3, -1.5, 0, 1.5, 3, -2, 2];
 const glowOptions = ["glow-pink", "glow-lavender", "glow-sky"];
 
-const MemoryWall = ({ memories }: { memories: Memory[] }) => {
+const MemoryWall = ({ memories, onDelete }: { memories: Memory[]; onDelete: () => void }) => {
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
@@ -19,6 +20,11 @@ const MemoryWall = ({ memories }: { memories: Memory[] }) => {
         m.message.toLowerCase().includes(q)
     );
   }, [memories, search]);
+
+  const handleDelete = (id: string) => {
+    deleteMemory(id);
+    onDelete();
+  };
 
   if (memories.length === 0) return null;
 
@@ -52,32 +58,47 @@ const MemoryWall = ({ memories }: { memories: Memory[] }) => {
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((memory, i) => (
-            <motion.div
-              key={memory.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: Math.min(i * 0.08, 0.5) }}
-              whileHover={{ y: -8, scale: 1.02 }}
-              className={`glass rounded-2xl p-6 cursor-default transition-shadow duration-300 hover:${glowOptions[i % 3]}`}
-              style={{
-                transform: `rotate(${tiltOptions[i % tiltOptions.length]}deg)`,
-              }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-sans font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
-                  From: {memory.from}
-                </span>
-              </div>
-              <p className="text-xs font-sans text-muted-foreground mb-2">
-                To: <span className="font-semibold text-foreground">{memory.to}</span>
-              </p>
-              <p className="font-sans text-sm text-foreground/90 leading-relaxed">
-                "{memory.message}"
-              </p>
-            </motion.div>
-          ))}
+          <AnimatePresence>
+            {filtered.map((memory, i) => (
+              <motion.div
+                key={memory.id}
+                layout
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: Math.min(i * 0.08, 0.5) }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className={`glass rounded-2xl p-6 cursor-default transition-shadow duration-300 hover:${glowOptions[i % 3]} relative group`}
+                style={{
+                  transform: `rotate(${tiltOptions[i % tiltOptions.length]}deg)`,
+                }}
+              >
+                {/* Delete button */}
+                <button
+                  onClick={() => handleDelete(memory.id)}
+                  className="absolute top-3 right-3 p-1.5 rounded-lg bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/20"
+                  title="Delete memory"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-sans font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
+                    {memory.isPersonal ? "✨ Personal" : `From: ${memory.from}`}
+                  </span>
+                </div>
+                {!memory.isPersonal && (
+                  <p className="text-xs font-sans text-muted-foreground mb-2">
+                    To: <span className="font-semibold text-foreground">{memory.to}</span>
+                  </p>
+                )}
+                <p className="font-sans text-sm text-foreground/90 leading-relaxed">
+                  "{memory.message}"
+                </p>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
 
         {filtered.length === 0 && search && (
