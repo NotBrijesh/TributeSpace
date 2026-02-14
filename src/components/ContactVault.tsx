@@ -1,7 +1,11 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Mail, MapPin, Copy, Check, Search, Shield, User, AtSign } from "lucide-react";
-import { getRegisteredNames, saveContact, getContacts, type Contact } from "@/lib/data";
+import { Phone, Mail, MapPin, Copy, Check, Search, Shield, User, AtSign, Cake, CalendarIcon } from "lucide-react";
+import { saveContact, getContacts, getNextBirthday, birthdayQuotes, type Contact } from "@/lib/data";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 
 const ContactVault = () => {
@@ -13,6 +17,7 @@ const ContactVault = () => {
   // Form
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [dob, setDob] = useState<Date>();
   const [email, setEmail] = useState("");
   const [social, setSocial] = useState("");
   const [city, setCity] = useState("");
@@ -28,11 +33,15 @@ const ContactVault = () => {
     );
   }, [contacts, search]);
 
+  const nextBirthday = useMemo(() => getNextBirthday(contacts), [contacts]);
+  const bdayQuote = useMemo(() => birthdayQuotes[Math.floor(Math.random() * birthdayQuotes.length)], []);
+
   const handleSubmit = () => {
-    if (!name.trim() || !phone.trim()) return;
+    if (!name.trim() || !phone.trim() || !dob) return;
     const newContact = saveContact({
       name: name.trim(),
       phone: phone.trim(),
+      dob: dob.toISOString(),
       email: email.trim() || undefined,
       social: social.trim() || undefined,
       city: city.trim() || undefined,
@@ -40,7 +49,7 @@ const ContactVault = () => {
     });
     setContacts([newContact, ...contacts]);
     confetti({ particleCount: 60, spread: 60, origin: { y: 0.7 }, colors: ["#e8a0bf", "#b4a7d6", "#9fc5e8"] });
-    setName(""); setPhone(""); setEmail(""); setSocial(""); setCity("");
+    setName(""); setPhone(""); setDob(undefined); setEmail(""); setSocial(""); setCity("");
     setShowForm(false);
   };
 
@@ -70,6 +79,32 @@ const ContactVault = () => {
             should always be one message away.
           </p>
         </motion.div>
+
+        {/* Nearest Birthday Banner */}
+        {nextBirthday && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="glass rounded-2xl p-5 mb-10 text-center border border-primary/20 glow-pink"
+          >
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Cake className="w-5 h-5 text-primary" />
+              <span className="font-display text-lg font-semibold text-foreground">
+                🎂 Upcoming Birthday!
+              </span>
+            </div>
+            <p className="font-sans text-foreground">
+              <span className="font-bold">{nextBirthday.contact.name}</span>'s birthday is{" "}
+              {nextBirthday.daysUntil === 0
+                ? "today! 🎉"
+                : nextBirthday.daysUntil === 1
+                ? "tomorrow! 🎉"
+                : `in ${nextBirthday.daysUntil} days!`}
+            </p>
+            <p className="text-sm text-muted-foreground font-sans mt-2 italic">"{bdayQuote}"</p>
+          </motion.div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
           <motion.button
@@ -115,6 +150,32 @@ const ContactVault = () => {
                     <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 ..." maxLength={15}
                       className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground font-sans focus:outline-none focus:ring-2 focus:ring-ring transition-all" />
                   </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-sans font-medium text-foreground mb-1">Date of Birth *</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className={cn(
+                            "w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-left font-sans focus:outline-none focus:ring-2 focus:ring-ring transition-all flex items-center gap-2",
+                            !dob && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="w-4 h-4" />
+                          {dob ? format(dob, "PPP") : "Pick your date of birth"}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dob}
+                          onSelect={setDob}
+                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   <div>
                     <label className="block text-sm font-sans font-medium text-foreground mb-1">Email (optional)</label>
                     <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" maxLength={100}
@@ -155,7 +216,7 @@ const ContactVault = () => {
 
                 <motion.button
                   onClick={handleSubmit}
-                  disabled={!name.trim() || !phone.trim()}
+                  disabled={!name.trim() || !phone.trim() || !dob}
                   className="w-full py-3 rounded-xl gradient-accent text-primary-foreground font-sans font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -198,6 +259,12 @@ const ContactVault = () => {
                     )}
                   </button>
                 </div>
+                {contact.dob && (
+                  <div className="flex items-center gap-2 text-sm font-sans">
+                    <Cake className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-foreground/80">{format(new Date(contact.dob), "MMM d, yyyy")}</span>
+                  </div>
+                )}
                 {contact.email && (
                   <div className="flex items-center gap-2 text-sm font-sans">
                     <Mail className="w-3.5 h-3.5 text-accent" />

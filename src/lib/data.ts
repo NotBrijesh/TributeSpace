@@ -43,6 +43,7 @@ export interface Memory {
   from: string;
   to: string;
   message: string;
+  isPersonal?: boolean;
   timestamp: number;
 }
 
@@ -50,6 +51,7 @@ export interface Contact {
   id: string;
   name: string;
   phone: string;
+  dob: string; // ISO date string
   email?: string;
   social?: string;
   city?: string;
@@ -74,6 +76,41 @@ export function saveMemory(memory: Omit<Memory, "id" | "timestamp">): Memory {
   localStorage.setItem("farewell-memories", JSON.stringify(memories));
   return newMemory;
 }
+
+export function deleteMemory(id: string): Memory[] {
+  const memories = getMemories().filter((m) => m.id !== id);
+  localStorage.setItem("farewell-memories", JSON.stringify(memories));
+  return memories;
+}
+
+export function getNextBirthday(contacts: Contact[]): { contact: Contact; daysUntil: number } | null {
+  if (contacts.length === 0) return null;
+  const today = new Date();
+  let nearest: { contact: Contact; daysUntil: number } | null = null;
+
+  for (const c of contacts) {
+    if (!c.dob) continue;
+    const dob = new Date(c.dob);
+    const nextBday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+    if (nextBday < today) {
+      nextBday.setFullYear(today.getFullYear() + 1);
+    }
+    const diff = Math.ceil((nextBday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (!nearest || diff < nearest.daysUntil) {
+      nearest = { contact: c, daysUntil: diff };
+    }
+  }
+  return nearest;
+}
+
+export const birthdayQuotes = [
+  "Another year older, another year of amazing memories together! 🎂",
+  "Birthdays come and go, but the memories we share last forever! 🎉",
+  "Here's to another trip around the sun with an incredible person! 🌟",
+  "May your birthday be as wonderful as you've made our school days! 🎈",
+  "Growing up is optional, but growing together is beautiful! 🎁",
+  "Wishing you all the happiness your heart can hold! 💖",
+];
 
 export function getContacts(): Contact[] {
   try {
